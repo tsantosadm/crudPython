@@ -37,6 +37,24 @@ def product_post(body: ProductRequest):
     return product.to_dict(), 201
 
 
+@bp.put(
+    '<int:product_id>',
+    summary='Update a product',
+    responses={200: ProductRequest, 404: ProductNotFound}
+)
+def product_update(path: ProductIdPath, body: ProductRequest):
+    product = Product.query.get(path.product_id)
+    if not product:
+        return ProductNotFound().dict(), 404
+
+    product.name = body.name
+    product.price = body.price
+    product.description = body.description
+
+    db.session.commit()
+    return product.to_dict(), 200
+
+
 @bp.delete(
     '/<int:product_id>',
     summary='Delete one product',
@@ -45,6 +63,3 @@ def product_post(body: ProductRequest):
 def product_delete(path: ProductIdPath):
     if path.product_id == 404:
         return ProductNotFound().dict(), 404
-
-
-
